@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calc</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 50px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 60px;
+      margin-bottom: 10px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 40%;
+      margin: 20px auto;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+
+    .daily-result {
+      display: none;
+    }
+
+    .daily-result-header {
+      display: none;
+    }
+
+    #result {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #inputContainer {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #inputBlock {
+      text-align: left;
+      margin-right: 20px;
+    }
+
+    input[type=text],
+    select,
+    input[type=number] {
+      width: 100%;
+      padding: 12px 20px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 20%;
+      background-color: #4CAF50;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>E-Godzinowka</h1>
+
+  <div id="inputContainer">
+    <div id="inputBlock">
+      <label for="fullName">Imię i Nazwisko:</label>
+      <input type="text" id="fullName" placeholder="Imię i Nazwisko" required>
+    </div>
+
+    <div id="inputBlock">
+      <label for="hourlyRate">Ile na godziny? </label>
+      <input type="number" id="hourlyRate" placeholder="ile na godziny?" value="20" required>
+    </div>
+
+    <div id="inputBlock">
+      <label for="monthSelect">Wybierz miesiąc:</label>
+      <select id="monthSelect" onchange="updateDays()">
+        <option value="31">Styczeń</option>
+        <option value="28">Luty</option>
+        <option value="31">Marzec</option>
+        <option value="30">Kwiecień</option>
+        <option value="31">Maj</option>
+        <option value="30">Czerwiec</option>
+        <option value="31">Lipiec</option>
+        <option value="31">Sierpień</option>
+        <option value="30">Wrzesień</option>
+        <option value="31">Październik</option>
+        <option value="30">Listopad</option>
+        <option value="31">Grudzień</option>
+      </select>
+    </div>
+  </div>
+
+  <form id="workForm">
+    <table id="tableform">
+      <thead>
+        <tr>
+          <th>Wolny</th>
+          <th>Data </th>
+          <th>Rozpoczęcie pracy </th>
+          <th>Koniec pracy</th>
+          <th class="daily-result-header">Wynik dzienny </th>
+          <th>Zmiana 1</th>
+          <th>Zmiana 2</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+
+      </tbody>
+    </table>
+    <button type="button" onclick="calculateTotal()">Policz godziny</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    let dayCount = 31;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      updateDays();
+    });
+
+    function updateDays() {
+      const monthSelect = document.getElementById("monthSelect");
+      dayCount = parseInt(monthSelect.value);
+      const tableBody = document.getElementById("tableBody");
+      tableBody.innerHTML = "";
+
+      for (let day = 1; day <= dayCount; day++) {
+        addRow(day);
+      }
+    }
+
+    function addRow(day) {
+      const tableBody = document.getElementById("tableBody");
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `
+      <td><button type="button" onclick="resetTime(${day})" style="background-color: rgb(255, 99, 71); margin: 0px; padding-left: 15px">X</button></td>
+        <td>${day}</td>
+        <td><input type="text" class="start-time" placeholder="od" value="5" required></td>
+        <td><input type="text" class="end-time" placeholder="do" value="14.5" required></td>
+        <td class="daily-result">0</td>
+        <td><button type="button" style="background-color: rgb(214, 214, 79); margin: 0px; padding-left: 15px" onclick="setTime1(${day}) ">1</button></td>
+        <td><button type="button" style="background-color: rgb(55, 52, 56); margin: 0px; padding-left: 15px" onclick="setTime2(${day})">2</button></td>
+      `;
+      tableBody.appendChild(newRow);
+    }
+
+    function resetTime(day) {
+      const startTimes = document.getElementsByClassName("start-time");
+      const endTimes = document.getElementsByClassName("end-time");
+
+      const index = day - 1;
+      startTimes[index].value = "0";
+      endTimes[index].value = "0";
+    }
+
+    function setTime1(day) {
+      const startTimes = document.getElementsByClassName("start-time");
+      const endTimes = document.getElementsByClassName("end-time");
+
+      const index = day - 1;
+      startTimes[index].value = "5";
+      endTimes[index].value = "14.5";
+    }
+
+    function setTime2(day) {
+      const startTimes = document.getElementsByClassName("start-time");
+      const endTimes = document.getElementsByClassName("end-time");
+
+      const index = day - 1;
+      startTimes[index].value = "14.5";
+      endTimes[index].value = "23";
+    }
+
+    function calculateTotal() {
+      let totalHours = 0;
+      let totalEarnings = 0;
+
+      const startTimes = document.getElementsByClassName("start-time");
+      const endTimes = document.getElementsByClassName("end-time");
+      const dailyResults = document.getElementsByClassName("daily-result");
+      const fullName = document.getElementById("fullName").value;
+      const selectedMonth = document.getElementById("monthSelect").options[document.getElementById("monthSelect").selectedIndex].text;
+
+      const dailyResultHeader = document.querySelector('.daily-result-header');
+      dailyResultHeader.style.display = "table-cell";
+
+      for (let i = 0; i < dayCount; i++) {
+        const startTime = parseFloat(startTimes[i].value);
+        const endTime = parseFloat(endTimes[i].value);
+        const hourlyRate = parseInt(document.getElementById("hourlyRate").value);
+        const hoursWorked = endTime - startTime;
+        const dayPay = hoursWorked * hourlyRate;
+
+        totalHours += hoursWorked;
+        totalEarnings += dayPay;
+
+        dailyResults[i].innerText = hoursWorked.toFixed(1);
+        dailyResults[i].style.display = "table-cell";
+      }
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = `Miesiąc: <b>${selectedMonth}</b> <br>Imię i Nazwisko: <b>${fullName}</b><br>Całkowita liczba godzin: <b>${totalHours.toFixed(1)}</b> godziny pracy.<br>Łączne zarobki: <b>${totalEarnings.toFixed(2)}</b> PLN`;
+
+      resultDiv.style.display = "block";
+    }
+  </script>
+</body>
+
+</html>
